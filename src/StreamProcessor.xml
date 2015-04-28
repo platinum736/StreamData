@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<streamdb>
+	<stream-processor name="streamprocessor1" window_size="10" join_on="timestamp" window_type="sliding_window" window_speed="1"> 
+		<stream name="temperaturEmitter" port="1337">
+			<attr name="temp" type="int" />
+			<attr name="rstring" type="string" />
+			<attr name="timestamp" type="timestamp" />
+		</stream>
+		<stream name="humidityEmitter" port="1338">
+		    <attr name="Humidity" type="int" />
+			<attr name="rstring" type="string" />
+			<attr name="timestamp" type="timestamp" />
+		</stream>
+	</stream-processor>
+</streamdb>
