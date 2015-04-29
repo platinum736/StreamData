@@ -10,6 +10,8 @@ import java.text.SimpleDateFormat;
 class StreamConsumer implements Runnable
 {
 	String[] tokens;
+	int id;
+	Executer executer;
 	static String delim=","; 
 	int Sum=0,Count=0;
 	Timestamp match;
@@ -22,7 +24,9 @@ class StreamConsumer implements Runnable
     String window_type;
     int window_speed;
     
-	StreamConsumer(int port, Streamsrc stream, LinkedList ll,int window_size,String window_type,int window_speed){
+	StreamConsumer(Executer ex,int i,int port, Streamsrc stream, LinkedList ll,int window_size,String window_type,int window_speed){
+		this.executer=ex;
+		this.id=i;
 		this.port=port;
 		this.stream=stream;
 		this.linkedlist=ll;
@@ -77,15 +81,17 @@ private void StreamAnlysis(String modifiedSentence) {
     if(linkedlist.size()<window_size)
         linkedlist.add(stream);
     else
-    	if(window_type.equalsIgnoreCase("Folding"))
+    	if(window_type.equalsIgnoreCase("Folding_window") && linkedlist.size()==window_size)
     	{
     	   linkedlist.clear();
     	   linkedlist.add(stream);
     	}
-        if(window_type.equalsIgnoreCase("Sliding"))
+        if(window_type.equalsIgnoreCase("sliding_window") && linkedlist.size()==window_size)
         {
         	linkedlist.removeFirst();
         	linkedlist.add(stream);
+        	executer.notify(id);
+        	System.out.println("removed cosumer"+linkedlist.size());
         }
   }
 }

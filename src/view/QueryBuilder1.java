@@ -10,13 +10,18 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.LinkedList;
 
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JOptionPane;
 import javax.swing.Timer;
 import javax.swing.table.DefaultTableModel;
 import javax.xml.parsers.DocumentBuilder;
@@ -74,6 +79,7 @@ public class QueryBuilder1 extends javax.swing.JFrame {
         whereValue = new javax.swing.JTextField();
         joinon = new javax.swing.JLabel();
         submitBtn = new javax.swing.JButton();
+        saveBtn = new javax.swing.JButton();
         joinonValue = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
@@ -110,6 +116,7 @@ public class QueryBuilder1 extends javax.swing.JFrame {
 
         where.setText("Where");
 
+        saveBtn.setText("Save Query");
        
         
         
@@ -181,18 +188,27 @@ public class QueryBuilder1 extends javax.swing.JFrame {
         submitBtn.addActionListener(new java.awt.event.ActionListener() {
         	
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-            	    streamPos=1;
-            	    AttributePos=1;
+            	if(selectAttributescb.getSelectedIndex()!=0){
+            	    AttributePos=(selectAttributescb.getSelectedIndex()-1)%3;
+            	    streamPos=(selectAttributescb.getSelectedIndex()-1)/3;
+            	}
+            	else
+            	{
+            	    AttributePos=-1;
+            	    streamPos=-1;	
+            	}
+            	    
+            	    no_of_streams=streamlist.getLength();
                 	Executer ex=new Executer((QueryBuilder1)This,streamProcessors[streamProcessorcb.getSelectedIndex()],window_size,window_type,window_speed,
-                			2,streamPos,AttributePos,
-                			operationscb.getSelectedIndex(),1,2,operatorscb.getSelectedIndex(),whereValue.getText());
-                	if(streamPos==0 && AttributePos==0){
+                			no_of_streams,streamPos,AttributePos,
+                			operationscb.getSelectedIndex(),1,whereAttributescb.getSelectedIndex(),operatorscb.getSelectedIndex(),whereValue.getText());
+                	if(selectAttributescb.getSelectedIndex()==0){
                 	      updatedResults=new String[0][6];
                 	      headerFields=new String[6];
                 	}
                 	else{
-                		  updatedResults=new String[0][3];
-                	      headerFields=new String[3];
+                		  updatedResults=new String[0][2];
+                	      headerFields=new String[2];
                 	}
 					model=new DefaultTableModel(updatedResults,headerFields);
 			        resultsTable.setModel(model);
@@ -217,6 +233,42 @@ public class QueryBuilder1 extends javax.swing.JFrame {
             }
         });
         
+        saveBtn.addActionListener(new java.awt.event.ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO Auto-generated method stub
+				String queryname;
+				queryname=JOptionPane.showInputDialog(getParent(),
+                        "Enter Query name to save", null);
+				if(queryname!="")
+				{
+					if (!file.exists()) {
+						try {
+							file.createNewFile();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					FileWriter fw=null;
+					try {
+						fw = new FileWriter(file.getAbsoluteFile());
+						BufferedWriter bw = new BufferedWriter(fw);
+						bw.write(queryname+","+streamProcessors[streamProcessorcb.getSelectedIndex()]+","+window_size+","+window_type+","+window_speed+","
+	                			+no_of_streams+","+streamPos+","+AttributePos+","+operationscb.getSelectedIndex()+","+1+","+
+								whereAttributescb.getSelectedIndex()+","+operatorscb.getSelectedIndex()+","+whereValue.getText());
+						bw.close();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
+				    
+				}
+			}
+        	
+        });
         
         joinonValue.setText("");
 
@@ -253,6 +305,8 @@ public class QueryBuilder1 extends javax.swing.JFrame {
                         .addGap(18, 18, 18)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(submitBtn)
+                            .addGap(18,18,18)
+                            .addComponent(saveBtn)
                             .addGroup(jPanel2Layout.createSequentialGroup()
                                 .addComponent(operatorscb, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -289,6 +343,7 @@ public class QueryBuilder1 extends javax.swing.JFrame {
                     .addComponent(joinonValue))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 217, Short.MAX_VALUE)
                 .addComponent(submitBtn)
+                .addComponent(saveBtn)
                 .addGap(28, 28, 28))
         );
 
@@ -524,7 +579,8 @@ public class QueryBuilder1 extends javax.swing.JFrame {
 	 * @param args
 	 *            the command line arguments
 	 */
-	public static void main(String args[]) {
+	//public static void main(String args[]) {
+	public static void main(){
 		/* Set the Nimbus look and feel */
 		// <editor-fold defaultstate="collapsed"
 		// desc=" Look and feel setting code (optional) ">
@@ -567,6 +623,7 @@ public class QueryBuilder1 extends javax.swing.JFrame {
 
 	// Variables declaration - do not modify//GEN-BEGIN:variables
 	private javax.swing.JButton submitBtn;
+	private javax.swing.JButton saveBtn;
 	private javax.swing.JComboBox streamProcessorcb;
 	private javax.swing.JComboBox streamNamescb;
 	private javax.swing.JComboBox operationscb;
@@ -589,9 +646,10 @@ public class QueryBuilder1 extends javax.swing.JFrame {
 	private javax.swing.JPanel jPanel3;
 	private javax.swing.JScrollPane jScrollPane1;
 	private javax.swing.JScrollPane jScrollPane2;
-	private javax.swing.JTable resultsTable;
+	javax.swing.JTable resultsTable;
 	private javax.swing.JTextField whereValue;
 	private javax.swing.JCheckBox options;
+	//private javax.swing.JButton savedButtons[]=new JButton[10];
 
 	private static String[] operations = {"", "Sum", "Count", "Average", "Max", "Min" };
 	private static String[] operators = { "<", "<=", "==", ">=", ">", "like" };
@@ -603,7 +661,7 @@ public class QueryBuilder1 extends javax.swing.JFrame {
 	private static String[] streamProcessors={"Select Stream processor name"};
 	private static JCheckBox[] chkboxoptions={};
 	private static String[] streamAttributes={};
-	private static String[] headerFields;// = new String[6]; // need to code length
+	static String[] headerFields;// = new String[6]; // need to code length
 
 	public String[][] updatedResults;// = new String[0][6];
 	public String[] rowAdd=new String[6];
@@ -612,9 +670,14 @@ public class QueryBuilder1 extends javax.swing.JFrame {
 	public String window_type;
 	public int window_speed;
 	static int count = 0;
+	int no_of_streams;
 	int streamPos;
 	int AttributePos;
 	public DefaultTableModel model;
+	
+	File file=new File("C:\\Users\\rishabh-pc\\Documents\\Java workspace\\StreamEmitters\\src\\savedQueries.txt");
+	//LinkedList<String> savedQueries=new LinkedList();
+	//int queryCount=0;
 	// private static Node spnode;
 	// End of variables declaration//GEN-END:variables
 }
